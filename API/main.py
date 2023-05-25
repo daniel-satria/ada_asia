@@ -101,7 +101,7 @@ app.add_middleware(
 
 
 # loading pipeline preprocess only
-pipeline_path = open('model/model_pipeline_ada.pkl', 'rb')
+pipeline_path = open('model/model_ada.pkl', 'rb')
 model_ada = pickle.load(pipeline_path)
 
 
@@ -116,37 +116,11 @@ def predict_iris(ada:Ada):
         
     ada_dict = ada.dict()
 
-    data_input = pd.DataFrame([[ada.tcgc_budget,
-                                ada.tcgc_type,
-                                ada.tcgc_flag_lock,
-                                ada.tcm_success,
-                                ada.tcm_status_campaign,
-                                ada.tcm_channel,
-                                ada.feature_tf_id,
-                                ada.tcm_inventory_id,
-                                ada.tcm_external_entity_id]])
+    data = pd.DataFrame(ada_dict, index=[0])
     
-    model_result = model_pipeline_ada.transform(data_input)
-
-
-    if(model_result[0] == 0):
-        tfgc_status = "0"
-
-    elif(model_result[0] == -1):
-        tfgc_status = "-1"
-        
-    elif(model_result[0] == 7):
-        tfgc_status = "7"
-
-    elif(model_result[0] == 9):
-        tfgc_status = "9"
-
-    elif(model_result[0] == 12):
-        tfgc_status = "12"
-        
-    else:
-        tfgc_status = "15"
+    model_result = model_ada.predict(data).item()
+    model_result = str(model_result) if model_result in [-1, 0, 7, 9, 12] else "15"
             
     return {
-            "tcgc_status": tfgc_status
+            "tcgc_status": model_result
             }
